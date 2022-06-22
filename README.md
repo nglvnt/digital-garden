@@ -7,3 +7,5 @@ A place to collect, process, combine, and develop ideas.
 ## Notes
 
 ## Resources
+
+[DVC](resources/dvc_resources.md)

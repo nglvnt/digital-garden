@@ -11,3 +11,5 @@ A place to collect, process, combine, and develop ideas.
 [Git](resources/git_resources.md)
 
 [DVC](resources/dvc_resources.md)
+
+[Docker](resources/docker_resources.md)

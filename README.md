@@ -4,6 +4,8 @@ A place to collect, process, combine, and develop ideas.
 
 ## Syntheses
 
+[Using R in VSCode](syntheses/using_r_in_vscode.md)
+
 ## Notes
 
 ## Resources

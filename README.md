@@ -17,3 +17,5 @@ A place to collect, process, combine, and develop ideas.
 [Docker](resources/docker_resources.md)
 
 [VSCode](resources/vscode_resources.md)
+
+[Quarto](resources/quarto_resources.md)

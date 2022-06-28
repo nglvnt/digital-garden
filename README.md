@@ -20,4 +20,6 @@ A place to collect, process, combine, and develop ideas.
 
 [VSCode](resources/vscode_resources.md)
 
+[Markdown](resources/markdown_resources.md)
+
 [Quarto](resources/quarto_resources.md)

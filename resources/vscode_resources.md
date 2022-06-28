@@ -6,6 +6,8 @@
 
 <https://flaviocopes.com/vscode/>
 
+<https://vscode.pro/>
+
 ## Useful extensions
 
 Settings Sync <https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync>
@@ -111,3 +113,9 @@ Latex Workshop
 ## Python
 
 <https://stevenmortimer.com/setting-up-vs-code-for-python-development-like-rstudio/>
+
+## Markdown
+
+<https://code.visualstudio.com/docs/languages/markdown>
+
+<https://thisdavej.com/build-an-amazing-markdown-editor-using-visual-studio-code-and-pandoc/>

@@ -6,6 +6,8 @@ A place to collect, process, combine, and develop ideas.
 
 [Using R in VSCode](syntheses/using_r_in_vscode.md)
 
+[Using DVC with R](syntheses/using_dvc_with_r.md)
+
 ## Notes
 
 ## Resources

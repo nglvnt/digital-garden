@@ -22,7 +22,7 @@ Switched to a new branch 'main'
 $ printf "# Repository for practicing and experimenting with DVC\n" > README.md
 $ git add README.md
 $ git commit -m "Initialize repository"
-[main (root-commit) db8512d] Initialize repository
+[main (root-commit) 9c686a8] Initialize repository
  1 file changed, 1 insertion(+)
  create mode 100644 README.md
 ```
@@ -46,7 +46,7 @@ As the output writes, we have successfully initialized the DVC repository. This 
 
 ```console
 $ git status
-On branch master
+On branch main
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
   new file:   .dvc/.gitignore
@@ -54,7 +54,7 @@ Changes to be committed:
   new file:   .dvcignore
 
 $ git commit -m "Initialize DVC repository"
-[main e2bdd8f] Initialize DVC repository
+[main 1cdf74a] Initialize DVC repository
  3 files changed, 6 insertions(+)
  create mode 100644 .dvc/.gitignore
  create mode 100644 .dvc/config
@@ -112,7 +112,7 @@ After running it, we get the data file and `git status` tells us about the two n
 
 ```console
 $ git status
-On branch master
+On branch main
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
   data/
@@ -188,7 +188,7 @@ We can now commit the changes.
 
 ```console
 $ git commit -m "Add diamonds data"
-[main 59d0e12] Add diamonds data
+[main 45a0cca] Add diamonds data
  3 files changed, 12 insertions(+)
  create mode 100644 data/.gitignore
  create mode 100644 data/diamonds.csv.dvc
@@ -250,7 +250,7 @@ To enable auto staging, run:
 
 $ git add get_diamonds_data.R data/diamonds.csv.dvc
 $ git commit -m "Keep only the diamonds of weight at least 1 carat"
-[main 0498c0a] Keep only the diamonds of weight at least 1 carat
+[main 2a90436] Keep only the diamonds of weight at least 1 carat
  2 files changed, 5 insertions(+), 2 deletions(-)
 ```
 
@@ -289,8 +289,8 @@ $ tree .dvc/cache
 Before going on, we create a new branch based on our initial version of the script and leave out the columns related to the dimension of the diamonds:
 
 ```console
-$ git checkout -b data_without_dimensions
-Switched to a new branch 'data_without_dimensions'
+$ git checkout -b data-without-dimensions
+Switched to a new branch 'data-without-dimensions'
 ```
 
 ```r
@@ -324,7 +324,7 @@ To enable auto staging, run:
 
 $ git add get_diamonds_data.R data/diamonds.csv.dvc
 $ git commit -m "Leave dimension-related columns out of the data"
-[data_without_dimensions af648be] Leave dimension-related columns out of the data
+[data-without-dimensions e7806c6] Leave dimension-related columns out of the data
  2 files changed, 6 insertions(+), 2 deletions(-)
 ```
 
@@ -334,7 +334,7 @@ We are now on the data_without_dimensions branch and let us see how our data loo
 
 ```console
 $ git branch
-* data_without_dimensions
+* data-without-dimensions
   main
 $ head -n5 data/diamonds.csv
 "carat","cut","color","clarity","price"
@@ -376,7 +376,7 @@ $ head -n5 data/diamonds.csv
 We can also use the checkout commands to get an earlier version of the data back. First, we check out the .dvc file and then we sync the data.
 
 ```console
-$ git checkout 59d0e12bc6e35db496ac8aa3acfea075aa07bd2f data/diamonds.csv.dvc
+$ git checkout HEAD^ data/diamonds.csv.dvc
 $ git status
 On branch main
 Changes to be committed:
@@ -453,7 +453,7 @@ To enable auto staging, run:
   dvc config core.autostage true
 $ git add create_scatterplot_price_vs_carat.R outputs/scatterplot_price_vs_carat.png.dvc outputs/.gitignore
 $ git commit -m "Create price vs. carat scatterplot"
-[main 157b279] Create price vs. carat scatterplot
+[main bd3eb1e] Create price vs. carat scatterplot
  3 files changed, 17 insertions(+)
  create mode 100644 create_scatterplot_price_vs_carat.R
  create mode 100644 outputs/.gitignore
@@ -471,3 +471,461 @@ $ dvc list --dvc-only --recursive .
 data/diamonds.csv
 outputs/scatterplot_price_vs_carat.png
 ```
+
+Take a look at the DVC cache as well.
+
+```console
+$ tree .dvc/cache
+.dvc/cache
+├── 2b
+│   └── 231a9a997d9c323707df7c4eb2e487
+├── 3b
+│   └── 72460f4050794ad9cb812cdb8b168a
+├── 4d
+│   └── 3d1d4bbad5e0806dbaec425cf90196
+└── 65
+    └── 72f8b495ca60da2069f53ec6bb72ec
+
+4 directories, 4 files
+```
+
+From top to bottom, the first file is the data file on the data-without-dimensions branch, the second one is the data file containing only diamonds of weight at least 1 carat, the third one is the initial data, and the last one is the scatterplot png file.
+
+## Remote storage
+
+### Setting a remote storage
+
+When sharing our analysis/model, we should share the data as well. By setting a remote (and providing the storage), we can share our DVC-tracked files.
+
+DVC has a long list of possible storage types, see the list [here](https://dvc.org/doc/command-reference/remote/add#supported-storage-types), for this note, a local remote storage will be used.
+
+First we create a directory and than set it as the default remote.
+
+```console
+$ mkdir ../dvc-practice-remote
+```
+
+For a local storage, both absolute and relative paths can be used (in the latter case one specifies the path relative to the working directory, however, the config file contains the path relative to the config file.)
+
+```console
+$ dvc remote add --default local_remote_storage ../dvc-practice-remote
+Setting 'local_remote_storage' as a default remote.
+```
+
+The general form of the command is `dvc remote add remote_name remote_url`.
+
+As the DVC config file has been changed when the remote was added, we have to stage and commit this change. What is content of the DVC config file after adding the remote?
+
+```console
+$ cat .dvc/config
+[core]
+    remote = local_remote_storage
+['remote "local_remote_storage"']
+    url = ../../dvc-practice-remote
+```
+
+```console
+$ git add .dvc/config
+$ git commit -m "Configure DVC remote storage"
+[main 0a2d582] Configure DVC remote storage
+ 1 file changed, 4 insertions(+)
+```
+
+### Pushing data to a remote
+
+Now that we have set the remote up, we can push the data to it:
+
+```console
+$ dvc push
+2 files pushed
+```
+
+Some files from the cache have been copied to the remote storage:
+
+```console
+$ tree ../dvc-practice-remote
+../dvc-practice-remote/                                                            
+├── 3b
+│   └── 72460f4050794ad9cb812cdb8b168a
+└── 65
+    └── 72f8b495ca60da2069f53ec6bb72ec
+
+2 directories, 2 files
+```
+
+Two important things to note:
+
+1) The remote is configured in the DVC config file, thus when changing to a branch where the DVC config file does not contain the necessary information, we cannot use `dvc push`. The data-without-dimensions branch was created before configuring the remote, let us try to use dvc push there.
+
+    ```console
+    $ git checkout data_without_dimensions
+    Switched to branch 'data-without-dimensions'
+    $ dvc push
+    ERROR: failed to push data to the cloud - config file error: no remote specified. Create a default remote with
+        dvc remote add -d <remote name> <remote url>
+    ```
+  
+    However, the remote could be easily set by either using the `dvc remote add` command or by merging the DVC config file from a branch, where the remote has been already set.
+
+2) When pushing, only the data in the current working directory is copied to the remote storage. The -a or --all-branches switch uploads files from the last commits of the branches, the -A or --all-commits from all the commits. Note that even if the DVC config file of the other branch does not contain the remote information, using -a or -A still copies the objects tracked by DVC in those branches.
+
+    ```{}
+    $ git checkout main
+    Switched to branch 'main'
+    $ dvc push -A
+    2 files pushed
+    $ tree ../dvc-practice-remote
+    ../dvc-practice-remote
+    ├── 2b
+    │   └── 231a9a997d9c323707df7c4eb2e487
+    ├── 3b
+    │   └── 72460f4050794ad9cb812cdb8b168a
+    ├── 4d
+    │   └── 3d1d4bbad5e0806dbaec425cf90196
+    └── 65
+        └── 72f8b495ca60da2069f53ec6bb72ec
+
+    4 directories, 4 files
+    ```
+
+### Pulling tracked files from a remote
+
+There are many ways how a remote storage can be utilized.
+
+1) Restoring accidentally deleted files
+    If we delete the data file from the data directory, then we can restore it using `dvc checkout` from the local cache.
+
+    ```console
+    $ rm data/diamonds.csv
+    $ ls data
+    diamonds.csv.dvc
+    $ dvc checkout
+    A       data/diamonds.csv
+    $ ls data
+    diamonds.csv  diamonds.csv.dvc
+    ```
+
+    However, if both of the data file and the local cache have been deleted, we can restore them from the remote storage with `dvc pull`.
+
+    ```console
+    $ rm data/diamonds.csv
+    $ rm outputs/scatterplot_price_vs_carat.png
+    $ rm -rf .dvc/cache
+    $ dvc status
+    outputs/scatterplot_price_vs_carat.png.dvc:                           
+            changed outs:
+                    not in cache:       outputs/scatterplot_price_vs_carat.png
+    data/diamonds.csv.dvc:
+            changed outs:
+                    not in cache:       data/diamonds.csv
+    $ dvc checkout
+    ERROR: Checkout failed for following targets:
+    /home/levente/projects/dvc-practice/data/diamonds.csv
+    /home/levente/projects/dvc-practice/outputs/scatterplot_price_vs_carat.png
+    Is your cache up to date?
+    <https://error.dvc.org/missing-files>
+    $ dvc pull
+    A       outputs/scatterplot_price_vs_carat.png
+    A       data/diamonds.csv
+    2 files added and 2 files fetched
+    $ $ tree .dvc/cache
+    .dvc/cache
+    ├── 3b
+    │   └── 72460f4050794ad9cb812cdb8b168a
+    └── 65
+        └── 72f8b495ca60da2069f53ec6bb72ec
+
+    2 directories, 2 files
+    $ dvc pull -A
+    2 files fetched
+    ```
+
+2) Cloning a repository
+
+    Suppose that we find a Git + DVC repository that we would like to use. We first clone the Git repository and use dvc pull to fetch all the data into the local cache and check out the current versions of the DVC-tracked files.
+
+    ```console
+    $ cd ..
+    $ git clone dvc-practice dvc-practice-cloned
+    Cloning into 'dvc-practice-cloned'...
+    done.
+    $ cd dvc-practice-cloned
+    $ git status
+    On branch main
+    Your branch is up to date with 'origin/main'.
+
+    nothing to commit, working tree clean
+    $ dvc status
+    outputs/scatterplot_price_vs_carat.png.dvc:                           
+            changed outs:
+                    not in cache:       outputs/scatterplot_price_vs_carat.png
+    data/diamonds.csv.dvc:
+            changed outs:
+                    not in cache:       data/diamonds.csv
+    $ ls data
+    diamonds.csv.dvc
+    $ tree .dvc/cache
+    .dvc/cache [error opening dir]
+
+    0 directories, 0 files
+    $ dvc pull -A
+    A       data/diamonds.csv
+    A       outputs/scatterplot_price_vs_carat.png
+    2 files added and 4 files fetched
+    $ cd ..
+    $ rm -rf dvc-practice-cloned
+    ```
+
+3) Accessing files from a data registry
+
+    dvc list gets all the files, even those that are not tracked by git
+
+    ```console
+    $ mkdir dvc-practice-registry
+    $ cd dvc-practice-registry
+    $ dvc list -R ../dvc-practice
+    .dvcignore
+    README.md
+    create_scatterplot_price_vs_carat.R
+    data/.gitignore
+    data/diamonds.csv
+    data/diamonds.csv.dvc
+    get_diamonds_data.R
+    outputs/.gitignore
+    outputs/scatterplot_price_vs_carat.png
+    outputs/scatterplot_price_vs_carat.png.dvc
+    $ dvc get ../dvc-practice data/diamonds.csv
+    $ tree
+    .
+    └── diamonds.csv
+
+    0 directories, 1 file
+    $ rm diamonds.csv
+    ```
+
+    ```console
+    $ git init
+    $ dvc init
+    $ git checkout -b main
+    $ git commit -m "Initialize DVC repository"
+    $ dvc import ../dvc-practice data/diamonds.csv
+    Importing 'data/diamonds.csv (../dvc-practice)' -> 'diamonds.csv'
+    To track the changes with git, run:
+
+        git add .gitignore diamonds.csv.dvc
+
+    To enable auto staging, run:
+
+            dvc config core.autostage true
+    $ git add .gitignore diamonds.csv.dvc
+    $ git commit -m "Import diamonds data from the practice repository"
+    $ tree -a -I ".git"
+    .
+    ├── diamonds.csv
+    ├── diamonds.csv.dvc
+    ├── .dvc
+    │   ├── cache
+    │   │   └── 3b
+    │   │       └── 72460f4050794ad9cb812cdb8b168a
+    │   ├── config
+    │   ├── .gitignore
+    │   └── tmp
+    │       ├── links
+    │       │   └── cache.db
+    │       ├── lock
+    │       ├── md5s
+    │       │   └── cache.db
+    │       └── rwlock
+    ├── .dvcignore
+    └── .gitignore
+
+    6 directories, 11 files
+    ```
+
+    ```r
+    if (!require("ggplot2", character.only = TRUE, quietly = TRUE)) {
+      install.packages("ggplot2")
+    }
+
+    data(diamonds, package = "ggplot2")
+
+    ## we only would like to analyze diamonds of weight at least 1 carat
+    diamonds <- diamonds[diamonds$carat >= 1, ]
+
+    ## remove diamonds with color "J"
+    diamonds <- diamonds[diamonds$color != "J", ]
+
+    write.csv(x = diamonds, file = "data/diamonds.csv", row.names = FALSE)
+    ```
+
+    ```console
+    $ dvc add data/diamonds.csv
+    $ git add get_diamonds_data.R data/diamonds.csv.dvc
+    $ git commit -m "Remove diamonds of color J"
+    [main 03bd024] Remove diamonds of color J
+     2 files changed, 5 insertions(+), 2 deletions(-)
+    $ dvc push
+    1 file pushed
+    ```
+
+    ```console
+    $ cd ../dvc-practice-registry
+    $ dvc status
+    diamonds.csv.dvc:
+            changed deps:
+                    update available:   data/diamonds.csv (../dvc-practice)
+    $ dvc update diamonds.csv.dvc
+    Importing 'data/diamonds.csv (../dvc-practice)' -> 'diamonds.csv'
+    $ git status
+    On branch main
+    Changes not staged for commit:
+      (use "git add <file>..." to update what will be committed)
+      (use "git restore <file>..." to discard changes in working directory)
+            modified:   diamonds.csv.dvc
+    
+    no changes added to commit (use "git add" and/or "git commit -a")
+    $ git add diamonds.csv.dvc
+    $ git commit -m "Update diamonds dataset from the practice repository"
+    ```
+
+    ```console
+    $ cd ../dvc-practice
+    $ rm -rf ../dvc-practice-registry
+    ```
+
+    dvc get downloads the data files, dvc import gets them and adds the .dvc files as well, dvc update to update
+
+## Elimination
+
+### Removing files from DVC
+
+To stop tracking a file, use `dvc remove` on the .dvc file. We have to add and commit the changes. The csv file is the one corresponding to the current state of the project.
+
+```console
+$ dvc remove data/diamonds.csv.dvc
+$ dvc status
+Data and pipelines are up to date.
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+  deleted:    data/.gitignore
+  deleted:    data/diamonds.csv.dvc
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+  data/diamonds.csv
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git rm data/.gitignore data/diamonds.csv.dvc
+$ git commit -m "Stop tracking diamonds dataset"
+[main fe2f0bd] Stop tracking diamonds dataset
+ 2 files changed, 5 deletions(-)
+ delete mode 100644 data/.gitignore
+ delete mode 100644 data/diamonds.csv.dvc
+```
+
+And with dvc gc we can delete the contents of the cache.
+
+```console
+$ tree .dvc/cache
+.dvc/cache
+├── 2b
+│   └── 231a9a997d9c323707df7c4eb2e487
+├── 3b
+│   └── 72460f4050794ad9cb812cdb8b168a
+├── 4d
+│   └── 3d1d4bbad5e0806dbaec425cf90196
+├── 65
+│   └── 72f8b495ca60da2069f53ec6bb72ec
+└── d9
+    └── bb64fcb7cc558fac596649c0c76b16
+
+5 directories, 5 files
+$ dvc gc -w
+WARNING: This will remove all cache except items used in the workspace of the current repo.
+Are you sure you want to proceed? [y/n]: y
+$ tree .dvc/cache
+.dvc/cache
+├── 2b
+├── 3b
+├── 4d
+├── 65
+│   └── 72f8b495ca60da2069f53ec6bb72ec
+└── d9
+$ tree ../dvc-practice-remote/
+../dvc-practice-remote/
+├── 2b
+│   └── 231a9a997d9c323707df7c4eb2e487
+├── 3b
+│   └── 72460f4050794ad9cb812cdb8b168a
+├── 4d
+│   └── 3d1d4bbad5e0806dbaec425cf90196
+├── 65
+│   └── 72f8b495ca60da2069f53ec6bb72ec
+└── d9
+    └── bb64fcb7cc558fac596649c0c76b16
+
+5 directories, 5 files
+$ dvc gc -w -c
+WARNING: This will remove all cache except items used in the workspace of the current repo.
+Are you sure you want to proceed? [y/n]: y
+No unused 'local' cache to remove.
+$ tree ../dvc-practice-remote/
+../dvc-practice-remote/
+├── 2b
+├── 3b
+├── 4d
+├── 65
+│   └── 72f8b495ca60da2069f53ec6bb72ec
+└── d9
+
+5 directories, 1 file 
+```
+
+### Destroying a DVC repository
+
+The whole DVC repo can be destroyed by using `dvc destroy`. We have to add and commit again.
+
+```console
+$ dvc destroy
+This will destroy all information about your pipelines, all data files, as well as cache in .dvc/cache.
+Are you sure you want to continue? [y/n]: y
+$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+  deleted:    .dvc/.gitignore
+  deleted:    .dvc/config
+  deleted:    .dvcignore
+  deleted:    outputs/.gitignore
+  deleted:    outputs/scatterplot_price_vs_carat.png.dvc
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+  data/
+  outputs/scatterplot_price_vs_carat.png
+
+no changes added to commit (use "git add" and/or "git commit -a")
+$ git rm .dvc/.gitignore .dvc/config .dvcignore outputs/scatterplot_price_vs_carat.png.dvc outputs/.gitignore
+$ git commit -m "Destroy DVC repository"
+[main c3e9d23] Destroy DVC repository
+ 5 files changed, 15 deletions(-)
+ delete mode 100644 .dvc/.gitignore
+ delete mode 100644 .dvc/config
+ delete mode 100644 .dvcignore
+ delete mode 100644 outputs/.gitignore
+ delete mode 100644 outputs/scatterplot_price_vs_carat.png.dvc
+```
+
+## Pipelines
+
+### Adding stages

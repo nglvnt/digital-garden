@@ -10,6 +10,8 @@ A place to collect, process, combine, and develop ideas.
 
 ## Notes
 
+[Keyboard shortcut issues in VSCode](notes/vscode_shortcut_issues.md)
+
 ## Resources
 
 [Git](resources/git_resources.md)
